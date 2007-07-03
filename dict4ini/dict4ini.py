@@ -2,8 +2,8 @@
 # dump python dict to ini format file
 # Author: limodou (limodou@gmail.com)
 # Copyleft BSD
-# $Revision: 2097 $
 # you can see http://wiki.woodpecker.org.cn/moin/Dict4Ini for more details
+# and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
 # 0.9.2-----------------------
