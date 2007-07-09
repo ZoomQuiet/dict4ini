@@ -6,6 +6,11 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.2.1-----------------------
+#   2007/07/09 thanks to Mayowa Akinyemi
+#     Add the ability to protect specific sections.
+#     When use with the secretKey or hideData only section names listed in the
+#     secretSections parameter will be encrypted
 # 0.9.2-----------------------
 #   2007/07/03
 #     Add clear method
@@ -185,7 +190,11 @@ class DictNode(object):
         self._section = []
 
 class DictIni(DictNode):
-    def __init__(self, inifile=None, values=None, encoding=None, commentdelimeter='#', sectiondelimeter=section_delimeter, onelevel=False, format="%s = %s", hideData=False, secretKey=None):
+    def __init__(self, inifile=None, values=None, encoding=None,
+                    commentdelimeter='#', sectiondelimeter=section_delimeter,
+                    onelevel=False, format="%s = %s",
+                    hideData=False, secretKey=None, secretSections=None ):
+                        
         self._items = {}
         self._inifile = inifile
         self._root = self
@@ -199,6 +208,9 @@ class DictIni(DictNode):
         self._format = format
         self._secretKey = secretKey
         self._hideData = hideData
+        self._secretSections = secretSections
+        if type(secretSections) is str:
+            self._secretSections = secretSections.split(',')
         assert not self
         if not self._section_delimeter:
             raise Exception, "section_delimeter cann't be empty!"
@@ -251,7 +263,7 @@ class DictIni(DictNode):
                         lines = c.splitlines()
                         default.append('\n'.join(['%s %s' % (self._commentdelimeter, x) for x in lines]))
 
-                    default.append(self._format % (key, self.uni_str(value, encoding)))
+                    default.append(self._format % (key, self.uni_str(value, encoding, section)))
             if default:
                 buf.insert(0, '\n'.join(default))
                 buf.insert(0, '[%s]' % self._section_delimeter.join(section))
@@ -321,7 +333,7 @@ class DictIni(DictNode):
                     continue
                 key, value = line.split(self._format.replace('%s', '').strip(), 1)
                 key = key.strip()
-                value = self.process_value(value.strip(), encoding)
+                value = self.process_value(value.strip(), encoding, section)
                 if section:
                     self.__setitem__(section + self._section_delimeter + key, value)
                     #if comment then set it
@@ -353,8 +365,8 @@ class DictIni(DictNode):
         self._comments = {}
         self._orders = {}
         
-    def process_value(self, value, encoding=None):
-        value = self.protect_value(value, 1)
+    def process_value(self, value, encoding=None, section=None):
+        value = self.protect_value(value, 1, section)
         
         length = len(value)
         t = value
@@ -407,7 +419,11 @@ class DictIni(DictNode):
         else:
             return ''
     
-    def protect_value(self, value, mode=0):
+    def protect_value(self, value, mode=0, section=None):
+        if self._secretSections is not None and section is not None:
+            if section not in self._secretSections:
+                return value
+            
         if mode == 0:
             # encrypt
             if crypt != None and self._secretKey != None :
@@ -425,8 +441,13 @@ class DictIni(DictNode):
 
         return value
     
-    def uni_str(self, a, encoding=None):
-        return self.protect_value(uni_prt(a, encoding))
+    def uni_str(self, a, encoding=None, section=None):
+        if section and isinstance(section, list):
+            current_section = section[0]
+        else:
+            current_section = section
+            
+        return self.protect_value(uni_prt(a, encoding), section=current_section)
     
     
 unescapechars = {'"':'"', 't':'\t', 'r':'\r', 'n':'\n', '\\':'\\', 'a':'\a', 'f':'\f', 
@@ -511,11 +532,36 @@ if __name__ == '__main__':
     print d.p
 
     d = DictIni('t2.ini', format="%s:%s", hideData=True)
-    d.p.a = '1'
-    d.p.b = '2'
+    d.a.a = 'mama'
+    d.a.b = 'lubs me!'
+
+    d.b.a = 'i'
+    d.b.b = 'lub bosunmi!'
+
+    d.c.a = 'dada'
+    d.c.b = 'lubs me too!'
     d.save()
 
     d = DictIni('t2.ini', format="%s:%s", hideData=True)
-    print d.p.a
-    print d.p.b
+    print d.a.a, d.a.b
+    print d.b.a, d.b.b
+    print d.c.a, d.c.b
 
+    # secret sections test
+    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c'])
+    d.a.a = 'mama'
+    d.a.b = 'lubs me!'
+
+    d.b.a = 'i'
+    d.b.b = 'lub bosunmi!'
+
+    d.c.a = 'dada'
+    d.c.b = 'lubs me too!'
+    d.c.c.a = 'far out!'
+
+    d.save()
+
+    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c'])
+    print d.a.a, d.a.b
+    print d.b.a, d.b.b
+    print d.c.a, d.c.b
