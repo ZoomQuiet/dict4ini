@@ -6,6 +6,12 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.2.3-----------------------
+#   2007/07/27
+#     Fix sub section bug
+# 0.9.2.2-----------------------
+#   2007/07/08
+#     Add missing __init__.py file.
 # 0.9.2.1-----------------------
 #   2007/07/09 thanks to Mayowa Akinyemi
 #     Add the ability to protect specific sections.
@@ -446,8 +452,8 @@ class DictIni(DictNode):
             current_section = section[0]
         else:
             current_section = section
-            
-        return self.protect_value(uni_prt(a, encoding), section=current_section)
+        
+        return self.protect_value(uni_prt(a, encoding), section=self._section_delimeter.join(section))
     
     
 unescapechars = {'"':'"', 't':'\t', 'r':'\r', 'n':'\n', '\\':'\\', 'a':'\a', 'f':'\f', 
@@ -548,7 +554,7 @@ if __name__ == '__main__':
     print d.c.a, d.c.b
 
     # secret sections test
-    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c'])
+    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c', 'c/c'])
     d.a.a = 'mama'
     d.a.b = 'lubs me!'
 
@@ -561,7 +567,7 @@ if __name__ == '__main__':
 
     d.save()
 
-    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c'])
+    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c', 'c/c'])
     print d.a.a, d.a.b
     print d.b.a, d.b.b
     print d.c.a, d.c.b
