@@ -7,8 +7,10 @@
 #
 # Updates:
 # 0.9.2.3-----------------------
-#   2007/07/27
-#     Fix sub section bug
+#   2007/08/08
+#     Fix sub section bug, for secretSection argument, dict4ini will encrypt all
+#     subsections of a secretSection, for example, secretSection=['a', 'c'], then
+#     all subsections of 'a' and 'c' will be encrypted.
 # 0.9.2.2-----------------------
 #   2007/07/08
 #     Add missing __init__.py file.
@@ -427,7 +429,10 @@ class DictIni(DictNode):
     
     def protect_value(self, value, mode=0, section=None):
         if self._secretSections is not None and section is not None:
-            if section not in self._secretSections:
+            for s in self._secretSections:
+                if section.startswith(s):
+                    break
+            else:
                 return value
             
         if mode == 0:
@@ -554,7 +559,7 @@ if __name__ == '__main__':
     print d.c.a, d.c.b
 
     # secret sections test
-    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c', 'c/c'])
+    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c/c'])
     d.a.a = 'mama'
     d.a.b = 'lubs me!'
 
@@ -564,10 +569,12 @@ if __name__ == '__main__':
     d.c.a = 'dada'
     d.c.b = 'lubs me too!'
     d.c.c.a = 'far out!'
+    d.c.c.b.a = 'ppppp'
 
     d.save()
 
-    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c', 'c/c'])
+    d = DictIni('t3.ini', format="%s:%s", hideData=True, secretSections=['a', 'c/c'])
     print d.a.a, d.a.b
     print d.b.a, d.b.b
     print d.c.a, d.c.b
+    print d.c.c.b.a
