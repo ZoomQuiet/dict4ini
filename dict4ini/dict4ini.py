@@ -6,6 +6,9 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.2.4-----------------------
+#   2007/08/23
+#     Fix the end string is \" bug
 # 0.9.2.3-----------------------
 #   2007/08/08
 #     Fix sub section bug, for secretSection argument, dict4ini will encrypt all
@@ -357,7 +360,7 @@ class DictIni(DictNode):
             except Exception, err:
                 import traceback
                 traceback.print_exc()
-                print 'Error in [line %d]%s:' % (lineno, line)
+                print 'Error in [line %d]: %s' % (lineno, line)
                 print line
         if isinstance(inifile, (str, unicode)):
             f.close()
@@ -386,9 +389,14 @@ class DictIni(DictNode):
             if t[i] == '"': #string quote
                 buf.append(t[i])
                 i += 1
-                while t[i] != '"' or (t[i] == '"' and t[i-1] == '\\'):
-                    buf.append(t[i])
-                    i += 1
+                while t[i] != '"':
+                    if t[i] == '\\':
+                        buf.append(t[i])
+                        buf.append(t[i+1])
+                        i += 2
+                    else:
+                        buf.append(t[i])
+                        i += 1
                 buf.append(t[i])
                 i += 1
             elif t[i] == ',':
@@ -535,12 +543,12 @@ if __name__ == '__main__':
     d['s'].a = 1
     d['m/m'] = 'testing'
     d['p'] = r'\?'
-    d.t.m.p = '3'
+    d.t.m.p = 'd:\\'
     print d
     d.save()
 
     d = DictIni('t.ini', format="%s:%s", secretKey='mayowa')
-    print d.p
+    print d.p, d.t.m.p
 
     d = DictIni('t2.ini', format="%s:%s", hideData=True)
     d.a.a = 'mama'
