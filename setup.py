@@ -9,7 +9,7 @@ setup(
     version="0.9.2.4",
     author="limodou",
     author_email="limodou@gmail.com",
-    url="http://wiki.woodpecker.org.cn/moin.cgi/Dict4Ini",
+    url="http://code.google.com/p/dict4ini/",
     description="An ini configure process module, and deal with ini file as a dict object",
     license="BSD",
     packages=["dict4ini"],
