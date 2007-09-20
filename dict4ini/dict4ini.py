@@ -9,6 +9,9 @@
 # 0.9.2.5-----------------------
 #   2007/09/19
 #     Save boolean value to 0 or 1
+#     Add iterator support, and you can use for i in ini to iterator (key,value) now
+#     Add 'in' test support, so you can test if a key is in a ini via key in ini,
+#         it's the same with ini.has_key(key)
 # 0.9.2.4-----------------------
 #   2007/08/23
 #     Fix the end string is \" bug
@@ -168,9 +171,17 @@ class DictNode(object):
 
     def __len__(self):
         return len(self._items)
+    
+    #add iterator support
+    def __iter__(self):
+        return self._items.iteritems()
 
     def has_key(self, name):
         return self._items.has_key(name)
+    
+    #add in test support
+    def __contains__(self, name):
+        return self.has_key(name)
 
     def items(self):
         return self._items.items()
