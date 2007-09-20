@@ -6,6 +6,9 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.2.5-----------------------
+#   2007/09/19
+#     Save boolean value to 0 or 1
 # 0.9.2.4-----------------------
 #   2007/08/23
 #     Fix the end string is \" bug
@@ -72,7 +75,6 @@ __version__ = '0.9'
 import sys
 import locale
 import os.path
-import re
 
 section_delimeter = '/'
 
@@ -517,6 +519,8 @@ def uni_prt(a, encoding=None):
     elif isinstance(a, unicode):
         t = escstr(a)
         s.append('u"%s"' % t.encode(encoding))
+    elif isinstance(a, bool):
+        s.append(str(int(a)))
     else:
         s.append(str(a))
 
