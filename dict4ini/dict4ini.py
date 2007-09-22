@@ -6,7 +6,7 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
-# 0.9.2.6-----------------------
+# 0.9.3-----------------------
 #   2007/09/22
 #     Improve the comment process
 #     Improve empty section process
