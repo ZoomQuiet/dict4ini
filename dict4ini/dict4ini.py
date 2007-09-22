@@ -78,7 +78,7 @@
 #     Adding float format
 #
 
-__version__ = '0.9'
+__version__ = '0.9.2.6'
 
 import sys
 import locale
