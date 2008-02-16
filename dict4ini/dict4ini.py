@@ -167,20 +167,24 @@ class DictNode(object):
     def __setattr__(self, name, value):
         if name.startswith('_'):
             if name == '_comment':
-                lines = value.splitlines()
-                s = []
-                for x in lines:
-                    if not x.startswith(self._commentdelimeter):
-                        s.append(self._commentdelimeter + x)
-                    else:
-                        s.append(x)
-                self._root._comments[self._section_delimeter.join(self._section)] = '\n'.join(s)
+                self._root._comments[self._section_delimeter.join(self._section)] = self._get_comment_value(value)
             else:
                 self.__dict__[name] = value
         else:
             self.__setitem__(name, value)
 
+    def _get_comment_value(self, value):
+        lines = value.splitlines()
+        s = []
+        for x in lines:
+            if not x.startswith(self._commentdelimeter):
+                s.append(self._commentdelimeter + x)
+            else:
+                s.append(x)
+        return '\n'.join(s)
+    
     def comment(self, name, comment):
+        comment = self._get_comment_value(comment)
         if name:
             self._root._comments[self._section_delimeter.join(self._section + [name])] = comment
         else:
