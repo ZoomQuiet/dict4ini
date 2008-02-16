@@ -6,6 +6,10 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.4-----------------------
+#   2008/02/16
+#     Fix comment process, if you comment with node._comment, then if the comment
+#     does not begin with '#'(commentdelimeter), it'll automatically add it.
 # 0.9.3-----------------------
 #   2007/09/22
 #     Improve the comment process
@@ -93,7 +97,9 @@ except:
     crypt = None
     
 class DictNode(object):
-    def __init__(self, values, encoding=None, root=None, section=[], orders=[], sectiondelimeter=section_delimeter, onelevel=False, format="%s = %s", normal=False):
+    def __init__(self, values, encoding=None, root=None, section=[], orders=[], 
+            sectiondelimeter=section_delimeter, onelevel=False, format="%s = %s", 
+            normal=False, commentdelimeter='#'):
         self._items = values
         self._orders = orders
         self._encoding = encoding
@@ -103,6 +109,7 @@ class DictNode(object):
         self._onelevel = onelevel
         self._format = format
         self._normal = normal
+        self._commentdelimeter = commentdelimeter
 
     def __getitem__(self, name):
         if self._items.has_key(name):
@@ -110,7 +117,7 @@ class DictNode(object):
             if isinstance(value, dict):
                 return DictNode(value, self._encoding, self._root, self._section + [name], 
                     sectiondelimeter=self._section_delimeter, onelevel=self._onelevel, 
-                    format=self._format, normal=self._normal)
+                    format=self._format, normal=self._normal, commentdelimeter=self._commentdelimeter)
             else:
                 return value
         else:
@@ -118,7 +125,7 @@ class DictNode(object):
             self._root.setorder(self.get_full_keyname(name))
             return DictNode(self._items[name], self._encoding, self._root, self._section + [name], 
                 sectiondelimeter=self._section_delimeter, onelevel=self._onelevel, 
-                format=self._format, normal=self._normal)
+                format=self._format, normal=self._normal, commentdelimeter=self._commentdelimeter)
 
     def __setitem__(self, name, value):
         if not self._normal and self._section_delimeter and self._section_delimeter in name:
@@ -160,7 +167,14 @@ class DictNode(object):
     def __setattr__(self, name, value):
         if name.startswith('_'):
             if name == '_comment':
-                self._root._comments[self._section_delimeter.join(self._section)] = value
+                lines = value.splitlines()
+                s = []
+                for x in lines:
+                    if not x.startswith(self._commentdelimeter):
+                        s.append(self._commentdelimeter + x)
+                    else:
+                        s.append(x)
+                self._root._comments[self._section_delimeter.join(self._section)] = '\n'.join(s)
             else:
                 self.__dict__[name] = value
         else:
@@ -296,7 +310,7 @@ class DictIni(DictNode):
                     c = self._comments.get(self._section_delimeter.join(section + [key]), '')
                     if c:
                         lines = c.splitlines()
-                        default.append('\n'.join(['%s%s' % (self._commentdelimeter, x) for x in lines]))
+                        default.append('\n'.join(lines))
 
                     default.append(self._format % (key, self.uni_str(value, encoding, section)))
             if default:
@@ -306,7 +320,7 @@ class DictIni(DictNode):
                 c = self._comments.get(self._section_delimeter.join(section), '')
                 if c:
                     lines = c.splitlines()
-                    buf.insert(0, '\n'.join(['%s' % x for x in lines]))
+                    buf.insert(0, '\n'.join(lines))
             return '\n'.join(buf + [''])
         else:
             buf = []
@@ -582,11 +596,13 @@ def uni_prt(a, encoding=None):
     return ''.join(s)
 
 def getdefaultencoding(encoding):
+    import codecs
+
     if not encoding:
         encoding = locale.getdefaultlocale()[1]
-    if not encoding:
-        encoding = sys.getfilesystemencoding()
-    if not encoding:
+    try:
+        codecs.lookup(encoding)
+    except:
         encoding = 'utf-8'
     return encoding
 
