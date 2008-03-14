@@ -6,6 +6,9 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.5-----------------------
+#   2008/03/14
+#     Fix __init__.py bug, and you can import dict4ini from dict4ini package
 # 0.9.4-----------------------
 #   2008/02/16
 #     Fix comment process, if you comment with node._comment, then if the comment
@@ -82,7 +85,7 @@
 #     Adding float format
 #
 
-__version__ = '0.9.2.6'
+__version__ = '0.9.5'
 
 import sys
 import locale
