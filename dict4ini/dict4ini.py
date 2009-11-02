@@ -6,6 +6,9 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.6-----------------------
+#   2009/11/02
+#     Add update function
 # 0.9.5-----------------------
 #   2008/03/14
 #     Fix __init__.py bug, and you can import dict4ini from dict4ini package
@@ -85,7 +88,7 @@
 #     Adding float format
 #
 
-__version__ = '0.9.5'
+__version__ = '0.9.6'
 
 import sys
 import locale
@@ -243,6 +246,10 @@ class DictNode(object):
         self._items = {}
         self._orders = []
         self._section = []
+        
+    def update(self, d):
+        for k, v in d.items():
+            self[k] = v
 
 class DictIni(DictNode):
     def __init__(self, inifile=None, values=None, encoding=None,
@@ -605,9 +612,9 @@ def uni_prt(a, encoding=None):
 def getdefaultencoding(encoding):
     import codecs
 
-    if not encoding:
-        encoding = locale.getdefaultlocale()[1]
     try:
+        if not encoding:
+            encoding = locale.getdefaultlocale()[1]
         codecs.lookup(encoding)
     except:
         encoding = 'utf-8'
