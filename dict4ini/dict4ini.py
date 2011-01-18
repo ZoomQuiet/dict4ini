@@ -6,6 +6,9 @@
 # and the new source project is in http://code.google.com/p/dict4ini/
 #
 # Updates:
+# 0.9.7-----------------------
+#   2011/01/18
+#     Fix #8
 # 0.9.6-----------------------
 #   2009/11/02
 #     Add update function
@@ -325,8 +328,7 @@ class DictIni(DictNode):
                     if c:
                         lines = c.splitlines()
                         default.append('\n'.join(lines))
-
-                    default.append(self._format % (key, self.uni_str(value, encoding, section)))
+                    default.append(self._format % (uni_prt(key, encoding), self.uni_str(value, encoding, section)))
             if default:
                 buf.insert(0, '\n'.join(default))
                 if section:

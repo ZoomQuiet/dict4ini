@@ -14,7 +14,10 @@
 
 from string import join
 from array import array
-import sha
+try:
+    import hashlib as sha
+except:
+    import sha
 from time import time
 
 class CryptError(Exception): pass
