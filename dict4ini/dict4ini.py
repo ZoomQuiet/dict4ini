@@ -2,10 +2,13 @@
 # dump python dict to ini format file
 # Author: limodou (limodou@gmail.com)
 # Copyleft BSD
-# you can see http://wiki.woodpecker.org.cn/moin/Dict4Ini for more details
-# and the new source project is in http://code.google.com/p/dict4ini/
+# you can see http://code.google.com/p/dict4ini/ for more details
 #
 # Updates:
+# 0.9.8-----------------------
+#   2011/11/08
+#     Remove read file skip not exsisted judge, instead of rasing Exception
+#     Add __enter__ and __exit__ to DictNode, thanks to yxj <381323646 AT qq.com>
 # 0.9.7-----------------------
 #   2011/01/18
 #     Fix #8
@@ -91,7 +94,7 @@
 #     Adding float format
 #
 
-__version__ = '0.9.6'
+__version__ = '0.9.8'
 
 import sys
 import locale
@@ -254,6 +257,11 @@ class DictNode(object):
         for k, v in d.items():
             self[k] = v
 
+    def __enter__(self):
+        return self
+    def __exit__(self,*args):
+        pass
+    
 class DictIni(DictNode):
     def __init__(self, inifile=None, values=None, encoding=None,
                     commentdelimeter='#', sectiondelimeter=section_delimeter,
@@ -284,7 +292,7 @@ class DictIni(DictNode):
         if values is not None:
             self._items = values
 
-        if self._inifile and os.path.exists(self._inifile):
+        if self._inifile:
             self.read(self._inifile, self._encoding)
 
     def setfilename(self, filename):
@@ -370,10 +378,7 @@ class DictIni(DictNode):
             inifile = self._inifile
 
         if isinstance(inifile, (str, unicode)):
-            try:
-                f = file(inifile, 'r')
-            except:
-                return  #may raise Exception is better
+            f = file(inifile, 'r')
         elif isinstance(inifile, file):
             f = inifile
         else:
@@ -677,3 +682,7 @@ if __name__ == '__main__':
     print d.b.a, d.b.b
     print d.c.a, d.c.b
     print d.c.c.b.a
+
+    with d.test as t:
+        t.item1 = 'aaa'
+    print t
