@@ -5,9 +5,11 @@
 # you can see http://code.google.com/p/dict4ini/ for more details
 #
 # Updates:
+# 0.9.9-----------------------
+#   Fix some syntax, make it more pythonic
 # 0.9.8-----------------------
 #   2011/11/08
-#     Remove read file skip not exsisted judge, instead of rasing Exception
+#     Remove read file skip not exsisted judge, instead of raising Exception
 #     Add __enter__ and __exit__ to DictNode, thanks to yxj <381323646 AT qq.com>
 # 0.9.7-----------------------
 #   2011/01/18
@@ -124,7 +126,7 @@ class DictNode(object):
         self._commentdelimeter = commentdelimeter
 
     def __getitem__(self, name):
-        if self._items.has_key(name):
+        if name in self._items:
             value = self._items[name]
             if isinstance(value, dict):
                 return DictNode(value, self._encoding, self._root, self._section + [name], 
@@ -150,7 +152,7 @@ class DictNode(object):
             _s = self._section[:]
             for i in sec[:-1]:
                 _s.append(i)
-                if obj.has_key(i):
+                if i in obj:
                     if isinstance(obj[i], dict):
                         obj = obj[i]
                     else:
@@ -167,7 +169,7 @@ class DictNode(object):
             self._root.setorder(self.get_full_keyname(name))
 
     def __delitem__(self, name):
-        if self._items.has_key(name):
+        if name in self._items:
             del self._items[name]
 
     def __repr__(self):
@@ -203,7 +205,7 @@ class DictNode(object):
             self._root._comments[self._section_delimeter.join(self._section)] = comment
 
     def __delattr__(self, name):
-        if self._items.has_key(name):
+        if name in self._items:
             del self._items[name]
 
     def __str__(self):
@@ -214,17 +216,14 @@ class DictNode(object):
     
     #add iterator support
     def __iter__(self):
-        return self._items.iteritems()
-
-    def has_key(self, name):
-        return self._items.has_key(name)
+        return iter(self._items.items())
     
     #add in test support
     def __contains__(self, name):
-        return self.has_key(name)
+        return name in self
 
     def items(self):
-        return self._items.items()
+        return list(self._items.items())
 
     def setdefault(self, name, value):
         return self._items.setdefault(name, value)
@@ -233,10 +232,10 @@ class DictNode(object):
         return self._items.get(name, default)
 
     def keys(self):
-        return self._items.keys()
+        return list(self._items.keys())
 
     def values(self):
-        return self._items.values()
+        return list(self._items.values())
 
     def get_full_keyname(self, key):
         return self._section_delimeter.join(self._section + [key])
@@ -306,7 +305,7 @@ class DictIni(DictNode):
             inifile = self._inifile
 
         if isinstance(inifile, (str, unicode)):
-            f = file(inifile, 'w')
+            f = open(inifile, 'w')
         elif isinstance(inifile, file):
             f = inifile
         else:
@@ -378,7 +377,7 @@ class DictIni(DictNode):
             inifile = self._inifile
 
         if isinstance(inifile, (str, unicode)):
-            f = file(inifile, 'r')
+            f = open(inifile, 'r')
         elif isinstance(inifile, file):
             f = inifile
         else:
@@ -445,7 +444,7 @@ class DictIni(DictNode):
             f.close()
 
     def setorder(self, key):
-        if not self._orders.has_key(key):
+        if key not in self._orders:
             self._orders[key] = self._ID
             self._ID += 1
             
@@ -569,7 +568,7 @@ def unescstr(value):
         i = 1
         end = len(value) - 1
         while i < end:
-            if value[i] == '\\' and unescapechars.has_key(value[i+1]):
+            if value[i] == '\\' and value[i+1] in unescapechars:
                 s.append(unescapechars[value[i+1]])
                 i += 2
             else:
