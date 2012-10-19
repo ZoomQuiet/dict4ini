@@ -6,7 +6,7 @@ from distutils.core import setup
 
 setup(
     name="dict4ini",
-    version="0.9.8",
+    version="0.9.9",
     author="limodou",
     author_email="limodou@gmail.com",
     url="http://code.google.com/p/dict4ini/",
